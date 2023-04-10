@@ -1,4 +1,3 @@
-
 #include <SPI.h>
 #include <SD.h>
 
@@ -23,52 +22,7 @@ float readBatteryVoltage(int pin){
   return voltage;
 }
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  pinMode(chipSelect, OUTPUT);
-
-  while(!Serial){
-    ; // wait for serial port to connect. needed for native USB port only
-  }
-
-  Serial.print("Initialising SD card...");
-
-  if(!SD.begin(chipSelect)){
-    Serial.println("initialization failed!");
-    while(1);
-  }
-  Serial.println("initialization done.");
-
-  // if(SD.exists("data.txt")){
-  //   Serial.println("data.txt exists.");
-  // } else{
-  //   Serial.println("data.txt doesn't exist.");
-  // }
-
-//   //open a new file and immediateley close it
-//   Serial.println("Creating data.txt...");
-//   myFile = SD.open("data.txt", FILE_WRITE);
-//   myFile.write("Hello");
-//   Serial.println("Writing to file successful");
-//   myFile.close();
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-
-  //MAKE A STRING FOR ASSEMBLING THE DATA TO LOG
-  String dataString="";
-
-  //read the voltage values and append to the string
-  for(int i = 0; i < numBatteries; i++){
-    float voltage = readBatteryVoltage(i);
-    dataString += String(voltage);
-    if (i < 2) {
-      dataString += ",";
-    }
-  }
-
+void writeDataToSDCard(String dataString) {
   //OPEN THE FILE
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
 
@@ -100,6 +54,43 @@ void loop() {
   else {
     Serial.println("error opening datalog.txt");
   }
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(chipSelect, OUTPUT);
+
+  while(!Serial){
+    ; // wait for serial port to connect. needed for native USB port only
+  }
+
+  Serial.print("Initialising SD card...");
+
+  if(!SD.begin(chipSelect)){
+    Serial.println("initialization failed!");
+    while(1);
+  }
+  Serial.println("initialization done.");
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  //MAKE A STRING FOR ASSEMBLING THE DATA TO LOG
+  String dataString="";
+
+  //read the voltage values and append to the string
+  for(int i = 0; i < numBatteries; i++){
+    float voltage = readBatteryVoltage(i);
+    dataString += String(voltage);
+    if (i < 2) {
+      dataString += ",";
+    }
+  }
+
+  // Call function to write data to SD card
+  writeDataToSDCard(dataString);
 
   delay(1000);
 }
