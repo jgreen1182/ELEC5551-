@@ -10,6 +10,8 @@ const int voltagePins[] = {A0, A1}; //Analog pins for taking voltage readings
 const float R1 = 10000.0; // R1 resistor value in ohms (change to your actual value)
 const float R2 = 10000.0; // R2 resistor value in ohms (change to your actual value)
 
+String fileName;
+
 //FUNCTION FOR READING VOLTAGE VALUES
 float readBatteryVoltage(int pin){
   int analogVoltage = analogRead(pin);
@@ -24,7 +26,7 @@ float readBatteryVoltage(int pin){
 
 void writeDataToSDCard(String dataString) {
   //OPEN THE FILE
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  File dataFile = SD.open(fileName, FILE_WRITE);
 
   // if the file is available, write to it:
   if (dataFile) {
@@ -52,8 +54,20 @@ void writeDataToSDCard(String dataString) {
   }
   // if the file isn't open, pop up an error:
   else {
-    Serial.println("error opening datalog.txt");
+    Serial.println("error opening " + fileName);
   }
+}
+
+String generateIndexedFileName() {
+  int fileIndex = 0;
+  String baseName = "datalog";
+  String fileExtension = ".txt";
+  
+  while (SD.exists(baseName + String(fileIndex) + fileExtension)) {
+    fileIndex++;
+  }
+  
+  return baseName + String(fileIndex) + fileExtension;
 }
 
 void setup() {
@@ -72,6 +86,9 @@ void setup() {
     while(1);
   }
   Serial.println("initialization done.");
+
+  fileName = generateIndexedFileName();
+  Serial.println("Created new file: " + fileName);
 }
 
 void loop() {
@@ -82,9 +99,9 @@ void loop() {
 
   //read the voltage values and append to the string
   for(int i = 0; i < numBatteries; i++){
-    float voltage = readBatteryVoltage(i);
+    float voltage = readBatteryVoltage(voltagePins[i]);
     dataString += String(voltage);
-    if (i < 2) {
+    if (i < numBatteries - 1) {
       dataString += ",";
     }
   }
