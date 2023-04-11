@@ -1,6 +1,8 @@
 #include <SPI.h>
 #include <SD.h>
 
+const int switchPin = 6; // Digital pin for the switch controlling the motor
+
 const String header[] = {"Battery 1 (V)", "Battery 2 (V)"};
 bool headerWritten = false;
 const int chipSelect = 10;
@@ -96,6 +98,7 @@ String generateIndexedFileName() {
 //MAIN SETUP
 void setup() {
   // put your setup code here, to run once:
+  pinMode(switchPin, INPUT_PULLUP);
   Serial.begin(9600);
   //pinMode(chipSelect, OUTPUT);
 
@@ -142,6 +145,11 @@ void setup() {
 //MAIN LOOP
 void loop() {
   // put your main code here, to run repeatedly:
+
+  // Wait for the switch to be activated
+  while (digitalRead(switchPin) == LOW) {
+    delay(100);
+  }
 
   //MAKE A STRING FOR ASSEMBLING THE DATA TO LOG
   String dataString="";
